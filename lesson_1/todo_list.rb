@@ -50,7 +50,7 @@ class TodoList
   end
 
   def select
-    new_list = TodoList.new('Selected')
+    new_list = TodoList.new(title)
     each do |item|
       new_list << item if yield(item)
     end
@@ -143,19 +143,19 @@ class TodoList
   end
 end
 
-todo1 = Todo.new('Buy Salmon')
-todo2 = Todo.new('Code')
-todo3 = Todo.new('Dont make a fuss')
+# todo1 = Todo.new('Buy Salmon')
+# todo2 = Todo.new('Code')
+# todo3 = Todo.new('Dont make a fuss')
 
-list = TodoList.new('Todays Todos')
+# list = TodoList.new('Todays Todos')
 
-list.add(todo1)
-list.add(todo2)
-list << todo3
+# list.add(todo1)
+# list.add(todo2)
+# list << todo3
 
-list.mark_all_undone
+# list.mark_all_undone
 
-puts list.all_not_done
+# puts list.all_not_done
 
 
 

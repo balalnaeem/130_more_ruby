@@ -1,0 +1,1 @@
+val = Proc.new { puts "hi" }
