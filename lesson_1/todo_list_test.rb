@@ -1,21 +1,22 @@
 require 'simplecov'
 SimpleCov.start
 
-require 'minitest/autorun'
-# require 'minitest/reporters'
+require "minitest/autorun"
+# require "minitest/reporters"
 # Minitest::Reporters.use!
 
-require_relative 'todo_list'
+require_relative "todo_list"
 
 class TodoListTest < Minitest::Test
 
+
   def setup
-    @todo1 = Todo.new('Buy milk')
-    @todo2 = Todo.new('Clean room')
-    @todo3 = Todo.new('Dont tell anyone')
+    @todo1 = Todo.new("Buy milk")
+    @todo2 = Todo.new("Clean room")
+    @todo3 = Todo.new("Go to gym")
     @todos = [@todo1, @todo2, @todo3]
 
-    @list = TodoList.new('Todays List')
+    @list = TodoList.new("Today's Todos")
     @list.add(@todo1)
     @list.add(@todo2)
     @list.add(@todo3)
@@ -26,7 +27,7 @@ class TodoListTest < Minitest::Test
   end
 
   def test_size
-    assert_equal(3, @list.size)
+    assert_equal(@todos.size, @list.size)
   end
 
   def test_first
@@ -38,46 +39,38 @@ class TodoListTest < Minitest::Test
   end
 
   def test_shift
-    todo = @list.shift
-    assert_equal(@todo1, todo)
-    assert_equal([@todo2, @todo3], @list.to_a)
+    assert_equal(@todo1, @list.shift)
+    assert_equal(@todos.slice(1, 2), @list.to_a)
   end
 
   def test_pop
-    todo = @list.pop
-    assert_equal(@todo3, todo)
-    assert_equal([@todo1, @todo2], @list.to_a)
+    assert_equal(@todo3, @list.pop)
+    assert_equal(@todos.slice(0, 2), @list.to_a)
   end
 
   def test_done?
     assert_equal(false, @list.done?)
   end
 
-  def test_add_raise_error
+  def test_typer_error_raised
     assert_raises(TypeError) { @list.add(1) }
-    assert_raises(TypeError) { @list.add('hi') }
+    assert_raises(TypeError) { @list.add('hi')}
+    assert_raises(TypeError) { @list.add(:symbol) }
+    assert_raises(TypeError) { @list.add([1, 2, 3]) }
+    assert_raises(TypeError) { @list.add({a: 1, b: 2})}
   end
 
-  def test_shovel_operator
-    new_todo = Todo.new('Code Like A MotherFucker')
+  def test_shovel_works
+    new_todo = Todo.new("Walk the dog")
     @list << new_todo
     @todos << new_todo
-
-    assert_equal(@todos, @list.to_a)
-  end
-
-  def test_add_method
-    new_todo = Todo.new('Live Like A MotherFucker')
-    @list.add(new_todo)
-    @todos << new_todo
-
     assert_equal(@todos, @list.to_a)
   end
 
   def test_item_at
-    assert_raises(IndexError) { @list.item_at(100) }
+    assert_raises(IndexError) { @list.item_at(100)}
     assert_equal(@todo1, @list.item_at(0))
-    assert_equal(@todo2, @list.item_at(1))
+    assert_equal(@todo3, @list.item_at(2))
   end
 
   def test_mark_done_at
@@ -90,14 +83,20 @@ class TodoListTest < Minitest::Test
 
   def test_mark_undone_at
     assert_raises(IndexError) { @list.mark_undone_at(100) }
-    @list.mark_undone_at(0)
-    assert_equal(false, @todo1.done?)
+    @list.mark_done_at(0)
+    @list.mark_done_at(1)
+    @list.mark_done_at(2)
+
+    @list.mark_undone_at(1)
+
+    assert_equal(true, @todo1.done?)
     assert_equal(false, @todo2.done?)
-    assert_equal(false, @todo3.done?)
+    assert_equal(true, @todo3.done?)
   end
 
   def test_done!
     @list.done!
+
     assert_equal(true, @todo1.done?)
     assert_equal(true, @todo2.done?)
     assert_equal(true, @todo3.done?)
@@ -106,76 +105,80 @@ class TodoListTest < Minitest::Test
 
   def test_remove_at
     assert_raises(IndexError) { @list.remove_at(100) }
-    removed = @list.remove_at(0)
-    assert_equal(@todo1, removed)
+    @list.remove_at(1)
+    assert_equal([@todo1, @todo3], @list.to_a)
   end
 
   def test_to_s
-    output = <<~HEREDOC.chomp
-    ---- Todays List ----
+    output = <<~OUTPUT.chomp
+    ---- Today's Todos ----
     [ ] Buy milk
     [ ] Clean room
-    [ ] Dont tell anyone
-    HEREDOC
+    [ ] Go to gym
+    OUTPUT
     assert_equal(output, @list.to_s)
   end
 
   def test_to_s_2
-    output = <<~HEREDOC.chomp
-    ---- Todays List ----
-    [X] Buy milk
+    @list.mark_done_at(2)
+    output = <<~OUTPUT.chomp
+    ---- Today's Todos ----
+    [ ] Buy milk
     [ ] Clean room
-    [ ] Dont tell anyone
-    HEREDOC
-    @list.mark_done_at(0)
+    [X] Go to gym
+    OUTPUT
     assert_equal(output, @list.to_s)
   end
 
   def test_to_s_3
-    output = <<~HEREDOC.chomp
-    ---- Todays List ----
+    @list.done!
+    output = <<~OUTPUT.chomp
+    ---- Today's Todos ----
     [X] Buy milk
     [X] Clean room
-    [X] Dont tell anyone
-    HEREDOC
-    @list.done!
+    [X] Go to gym
+    OUTPUT
     assert_equal(output, @list.to_s)
   end
 
   def test_each
-    result = []
-    @list.each { |todo| result << todo}
-    assert_equal(@todos, result)
+    @list.each { |task| task.done! }
+    output = <<~OUTPUT.chomp
+    ---- Today's Todos ----
+    [X] Buy milk
+    [X] Clean room
+    [X] Go to gym
+    OUTPUT
+    assert_equal(output, @list.to_s)
   end
 
   def test_each_2
-    result = @list.each { |todo| todo}
-    assert(@list, result)
+    assert_equal(@list, @list.each { |item| true })
   end
 
   def test_select
     @list.mark_done_at(0)
-    result = @list.select { |todo| todo.done? }
-    assert_equal(@todo1, result.first)
-  end
-
-  def test_mark_all_done
-    @list.mark_all_done
-    done = @list.select { |todo| todo.done? }
-    assert_equal(@list.item_at(0), done.item_at(0))
-    assert_equal(@list.item_at(1), done.item_at(1))
-    assert_equal(@list.item_at(2), done.item_at(2))
-  end
-
-  def test_mark_all_undone
-    @list.mark_done_at(0)
-    @list.mark_all_undone
-    done = @list.select { |todo| !todo.done? }
-    assert_equal(@list.item_at(0), done.item_at(0))
-    assert_equal(@list.item_at(1), done.item_at(1))
-    assert_equal(@list.item_at(2), done.item_at(2))
+    done_tasks = @list.select { |task| task.done? }
+    assert_equal(done_tasks.to_a, [@todo1])
   end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

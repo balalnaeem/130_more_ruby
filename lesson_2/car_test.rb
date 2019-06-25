@@ -1,22 +1,11 @@
-require 'minitest/autorun'
-# require 'minitest/reporters'
+require "minitest/autorun"
+# require "minitest/reporters"
+
 # Minitest::Reporters.use!
 
 require_relative 'car'
 
 class CarTest < Minitest::Test
-
-  # def test_value_equality
-  #   car1 = Car.new
-  #   car2 = Car.new
-
-  #   car1.name = 'kim'
-  #   car2.name = 'kim'
-
-  #   assert_equal(car1, car2)
-  #   assert_same(car1, car2)
-  # end
-
   def setup
     @car = Car.new
   end
@@ -33,9 +22,9 @@ class CarTest < Minitest::Test
     assert_nil(@car.name)
   end
 
-  def test_raises_initialize_with_arg
+  def test_raise_initialize_with_arg
     assert_raises(ArgumentError) do
-      car = Car.new(name: 'Joey')
+      car = Car.new(name: "Mustang")
     end
   end
 
@@ -43,7 +32,7 @@ class CarTest < Minitest::Test
     assert_instance_of(Car, @car)
   end
 
-  def test_includes_car
+  def test_arr_include_car
     arr = [1, 2, 3]
     arr << @car
     assert_includes(arr, @car)
