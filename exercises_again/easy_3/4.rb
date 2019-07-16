@@ -1,1 +1,1 @@
-4.rb
+assert list.empty?

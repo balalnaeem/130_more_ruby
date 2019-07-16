@@ -1,1 +1,3 @@
-3.rb
+assert_nil value
+
+assert_equal nil, value
